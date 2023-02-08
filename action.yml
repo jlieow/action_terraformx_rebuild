@@ -1,0 +1,81 @@
+# action.yaml
+name: "Terrraformx Rebuild with Destroy and Apply GitHub Action"
+description: "A GitHub Action that performs terraformx rebuild with destroy and apply on the specified Terraform root."
+inputs:
+  dir:
+    description: "Directory of the Terraform root within the Repo."
+    required: true
+  aws_profiles:
+    description: "List of AWS profile names, AWS access key ids and AWS secret access keys"
+    required: false
+  az_logins:
+    description: "List of Azure Subscriptions, logins and passwords"
+    required: false
+  az_service_principals:
+    description: "List of Azure Subscriptions, logins and passwords"
+    required: false
+  active_stages:
+    description: "Specify the active stages overriding the active stages in the workflow."
+    required: false
+    default: ""
+runs:
+  using: "composite"
+  steps:
+    - name: Set dir to store files from custom action
+      run: echo "ACTION_BASE_DIR=terraformx_rebuild" >> $GITHUB_ENV
+      shell: bash
+
+    - name: Checkout aws_spoke
+      uses: actions/checkout@v3
+      with:
+        repository: jlieow/${{ env.ACTION_BASE_DIR }}
+        path: ${{ env.ACTION_BASE_DIR }}
+
+    - name: Configure Azure credentials
+      run: |
+
+        az_logins=$(cat <<EOF
+        ${{ inputs.az_logins }}
+        EOF
+        )
+
+        echo "$az_logins" | jq -r '.[] | "\(.az_username) \(.az_password)"' | while read az_username az_password ; do
+          echo "Performing AZ Login..."
+          read -sp "Azure password: " AZ_PASS && echo && az login -u $az_username -p $az_password
+        done
+
+        az_service_principals=$(cat <<EOF
+        ${{ inputs.az_service_principals }}
+        EOF
+        )
+
+        echo "$az_service_principals" | jq -r '.[] | "\(.az_client_id) \(.az_client_secret) \(.az_tenant_id) \(.az_subscription_id)"' | while read az_client_id az_client_secret az_tenant_id az_subscription_id ; do
+          echo "Setting ARM Credentials for Service Principal..."
+
+          echo "ARM_CLIENT_ID=$az_client_id" >> $GITHUB_ENV
+          echo "ARM_CLIENT_SECRET=$az_client_secret" >> $GITHUB_ENV
+          echo "ARM_TENANT_ID=$az_tenant_id" >> $GITHUB_ENV
+          echo "ARM_SUBSCRIPTION_ID=$az_subscription_id" >> $GITHUB_ENV
+        done
+      shell: bash
+
+    - name: Configure AWS Profiles
+      run: |
+        aws_profiles=$(cat <<EOF
+        ${{ inputs.aws_profiles }}
+        EOF
+        )
+
+        echo "$aws_profiles" | jq -r '.[] | "\(.aws_access_key_id) \(.aws_secret_access_key) \(.profile_name)"' | while read aws_access_key_id aws_secret_access_key profile_name ; do
+          echo "Configuring AWS Credentials..."
+          aws configure set aws_access_key_id $aws_access_key_id --profile $profile_name
+          aws configure set aws_secret_access_key $aws_secret_access_key --profile $profile_name
+        done
+      shell: bash
+
+    - name: Perform Terraformx Rebuild
+      working-directory: ${{ inputs.dir }}
+      run: |
+        chmod +x $GITHUB_WORKSPACE/custom_github_actions/terraformx_rebuild/exe/rebuild
+        $GITHUB_WORKSPACE/custom_github_actions/terraformx_rebuild/exe/rebuild -active-stages=$active_stages
+      shell: bash
