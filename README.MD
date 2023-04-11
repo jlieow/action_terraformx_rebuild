@@ -22,6 +22,11 @@ jobs:
         uses: jlieow/terraformx_rebuild@V1 # Uses an action in the repo terraformx_apply owned by jlieow tagged as V1
         with:
           dir: ec2 # Remember to set the tag dir too
+          dir: ec2 # Remember to set the tag dir too
+          terraform_env_variables: |
+            key=value,
+            test=this,
+            hello=world
           aws_profiles: |
             [
               {

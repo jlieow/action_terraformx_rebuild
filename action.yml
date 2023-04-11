@@ -5,6 +5,9 @@ inputs:
   dir:
     description: "Directory of the Terraform root within the Repo."
     required: true
+  terraform_env_variables:
+    description: "List of Terraform Environmental Variables"
+    required: false
   aws_profiles:
     description: "List of AWS profile names, AWS access key ids and AWS secret access keys"
     required: false
@@ -31,6 +34,18 @@ runs:
         repository: jlieow/${{ env.ACTION_BASE_DIR }}
         path: ${{ env.ACTION_BASE_DIR }}
 
+    - name: Export Terraform Environmental Variables
+      run: |
+        terraform_env_variables=$(cat <<EOF
+        ${{ inputs.terraform_env_variables }}
+        EOF
+        )
+
+        echo "$terraform_env_variables" | while read line; do
+          echo $line >> $GITHUB_ENV 
+        done
+      shell: bash
+      
     - name: Configure Azure credentials
       run: |
 
