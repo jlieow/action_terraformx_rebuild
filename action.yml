@@ -87,6 +87,7 @@ runs:
     - name: Perform Terraformx Rebuild
       working-directory: ${{ inputs.dir }}
       run: |
-        chmod +x $GITHUB_WORKSPACE/custom_github_actions/action_terraformx_rebuild/exe/rebuild
-        $GITHUB_WORKSPACE/custom_github_actions/action_terraformx_rebuild/exe/rebuild -active-stages=$active_stages
+        chmod +x $GITHUB_WORKSPACE/action_terraformx_rebuild/exe/rebuild
+        $GITHUB_WORKSPACE/action_terraformx_rebuild/exe/rebuild -active-stages=$active_stages
       shell: bash
+      
