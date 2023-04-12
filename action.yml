@@ -24,15 +24,11 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Set dir to store files from custom action
-      run: echo "ACTION_BASE_DIR=terraformx_rebuild" >> $GITHUB_ENV
-      shell: bash
-
-    - name: Checkout aws_spoke
+    - name: Checkout jlieow/action_terraformx_rebuild repo to store files from custom action
       uses: actions/checkout@v3
       with:
-        repository: jlieow/${{ env.ACTION_BASE_DIR }}
-        path: ${{ env.ACTION_BASE_DIR }}
+        repository: jlieow/action_terraformx_rebuild
+        path: action_terraformx_rebuild
 
     - name: Export Terraform Environmental Variables
       run: |
