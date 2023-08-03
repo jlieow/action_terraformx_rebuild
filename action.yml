@@ -24,10 +24,10 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Checkout jlieow/action_terraformx_rebuild repo to store files from custom action
+    - name: Checkout iSoBored/action_terraformx_rebuild repo to store files from custom action
       uses: actions/checkout@v3
       with:
-        repository: jlieow/action_terraformx_rebuild
+        repository: iSoBored/action_terraformx_rebuild
         path: action_terraformx_rebuild
 
     - name: Export Terraform Environmental Variables
@@ -82,6 +82,10 @@ runs:
           aws configure set aws_access_key_id $aws_access_key_id --profile $profile_name
           aws configure set aws_secret_access_key $aws_secret_access_key --profile $profile_name
         done
+      shell: bash
+
+    - run: terraform init
+      working-directory: ${{ inputs.dir }}
       shell: bash
 
     - name: Perform Terraformx Rebuild
