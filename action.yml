@@ -21,6 +21,9 @@ inputs:
     description: "Specify the active stages overriding the active stages in the workflow."
     required: false
     default: ""
+  service_account_key:
+    description: "Key of service account"
+    required: false
 runs:
   using: "composite"
   steps:
