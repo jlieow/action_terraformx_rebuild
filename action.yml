@@ -21,7 +21,7 @@ inputs:
     description: "Specify the active stages overriding the active stages in the workflow."
     required: false
     default: ""
-  service_account_key:
+  gcp_service_account_key:
     description: "Key of service account"
     required: false
 runs:
@@ -89,7 +89,7 @@ runs:
 
     - name: Configure GCP Credentials
       run: |
-        echo ${{ inputs.service_account_key }} > ${{ github.workspace }}/key.json
+        echo ${{ inputs.gcp_service_account_key }} > ${{ github.workspace }}/key.json
         echo "GOOGLE_APPLICATION_CREDENTIALS=${{ github.workspace }}/key.json" >> "$GITHUB_ENV"
       shell: bash
 
