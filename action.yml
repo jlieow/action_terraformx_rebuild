@@ -21,8 +21,8 @@ inputs:
     description: "Specify the active stages overriding the active stages in the workflow."
     required: false
     default: ""
-  gcp_service_account_key:
-    description: "Key of service account"
+  gcp_profiles:
+    description: "List of GCP profile names and keys"
     required: false
 runs:
   using: "composite"
@@ -87,10 +87,12 @@ runs:
         done
       shell: bash
 
-    - name: Configure GCP Credentials
+    - name: Configure GCP Profiles
       run: |
-        echo ${{ inputs.gcp_service_account_key }} > ${{ github.workspace }}/key.json
-        echo "GOOGLE_APPLICATION_CREDENTIALS=${{ github.workspace }}/key.json" >> "$GITHUB_ENV"
+        jq -r '.[] | to_entries[] | "\(.key) \(.value | tojson )"' <<< '${{ inputs.gcp_profiles }}' | while read -r key value ; do
+          jq -n "$value" > ${{ github.workspace }}/"$key".json
+        done
+        echo "TF_VAR_github_workspace=${{ github.workspace }}" >> "$GITHUB_ENV"
       shell: bash
 
     - name: Perform Terraformx Rebuild
