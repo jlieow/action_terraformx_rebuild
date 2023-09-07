@@ -92,7 +92,6 @@ runs:
         jq -r '.[] | to_entries[] | "\(.key) \(.value | tojson )"' <<< '${{ inputs.gcp_profiles }}' | while read -r key value ; do
           jq -n "$value" > ${{ github.workspace }}/"$key".json
         done
-        echo "TF_VAR_github_workspace=${{ github.workspace }}" >> "$GITHUB_ENV"
       shell: bash
 
     - name: Perform Terraformx Rebuild
